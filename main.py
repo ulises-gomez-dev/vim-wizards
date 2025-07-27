@@ -4,7 +4,7 @@ Main entry point for the wizard game
 """
 
 from blessed import Terminal
-from game import Arena, Wizard
+from game import Arena, Wizard, Crystal
 
 def main():
     # Initialize terminal
@@ -15,6 +15,7 @@ def main():
     # Create the game objects
     arena = Arena(size=10)
     wizard = Wizard(x, y, arena)
+    crystal = Crystal(4, 4, arena)
 
     with term.cbreak(), term.hidden_cursor():
         loop = True
@@ -64,6 +65,12 @@ def main():
             elif key == '$': # Go to end of current row
                 _, current_y = wizard.position
                 wizard.position = ((arena._size -1) * 2, current_y)
+            
+            # collision detection
+            if wizard.collision(crystal):
+                # call the crystal re-render method
+                # crystal.spawn() 
+                pass
 
     # Clear screen on exit
     print(term.clear)
