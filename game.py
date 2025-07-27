@@ -1,5 +1,5 @@
 class Arena:
-    def __init__(self, size=6):
+    def __init__(self, size=10):
         self._size = size
         self._column_size = (size * 2) - 1
         self._row_size = size
