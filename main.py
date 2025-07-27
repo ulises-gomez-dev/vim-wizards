@@ -46,7 +46,7 @@ def main():
             print(f"Press 'h/j/k/l' to move left/down/up/right")
             print(f"Press '0/$' to teleport leftmost/rightmost")
             print(f"Press '#G' to teleport to row # (e.g., 5G for row 5)")
-            print(f"Press ':!q + Enter' to quit")
+            print(f"Press ':q!' to quit")
             if number_buffer:
                 print(f"Number buffer: {number_buffer}")
             if command_mode:
@@ -60,18 +60,18 @@ def main():
                 command_mode = True
                 command_buffer = ""
             elif command_mode:
-                if key.code == term.KEY_ENTER:
+                if key.code == term.KEY_ENTER or key == '\r' or key == '\n':
                     # Execute command
                     if command_buffer == "q!":
                         loop = False
                     # Clear command mode
                     command_mode = False
                     command_buffer = ""
-                elif key.code == term.KEY_ESCAPE:
+                elif key.code == term.KEY_ESCAPE or key == '\x1b':
                     # Exit command mode
                     command_mode = False
                     command_buffer = ""
-                elif key.code == term.KEY_BACKSPACE:
+                elif key.code == term.KEY_BACKSPACE or key == '\x7f' or key == '\b':
                     # Handle backspace
                     if command_buffer:
                         command_buffer = command_buffer[:-1]
@@ -91,83 +91,83 @@ def main():
 
                 # Movement Handling
                 if key.lower() in movements:
-                dx, dy = movements[key.lower()]
-                current_x, current_y = wizard.position
-                new_x = current_x + dx
-                new_y = current_y + dy
-            
-            # Check boundaries
-                if ( 0 <= new_x <= (arena._size -1) * 2 and
-                    0 <= new_y <= arena._size -1):
-                    # Check if trying to move into the immediate tail segment
-                    if wizard._tail and (new_x, new_y) == wizard._tail[0]:
-                        pass  # Don't allow this move
-                    else:
-                        wizard.position = (new_x, new_y)
-                        
-                        # Check for tail collision
-                        if wizard.collision_with_tail():
-                            loop = False
+                    dx, dy = movements[key.lower()]
+                    current_x, current_y = wizard.position
+                    new_x = current_x + dx
+                    new_y = current_y + dy
+                
+                    # Check boundaries
+                    if ( 0 <= new_x <= (arena._size -1) * 2 and
+                        0 <= new_y <= arena._size -1):
+                        # Check if trying to move into the immediate tail segment
+                        if wizard._tail and (new_x, new_y) == wizard._tail[0]:
+                            pass  # Don't allow this move
+                        else:
+                            wizard.position = (new_x, new_y)
+                            
+                            # Check for tail collision
+                            if wizard.collision_with_tail():
+                                loop = False
             
                 elif key == '0' and not number_buffer: # Go to start of current row only if buffer is empty
-                if not wizard.has_active_portal():
-                    old_pos = wizard.position
-                    _, current_y = wizard.position
-                    new_pos = (0, current_y)
-                    
-                    # Only teleport if not moving to same position
-                    if old_pos != new_pos:
-                        wizard.create_portal(old_pos, new_pos)
-                        wizard.position = new_pos
+                    if not wizard.has_active_portal():
+                        old_pos = wizard.position
+                        _, current_y = wizard.position
+                        new_pos = (0, current_y)
                         
-                        # Check for tail collision
-                        if wizard.collision_with_tail():
-                            loop = False
+                        # Only teleport if not moving to same position
+                        if old_pos != new_pos:
+                            wizard.create_portal(old_pos, new_pos)
+                            wizard.position = new_pos
+                            
+                            # Check for tail collision
+                            if wizard.collision_with_tail():
+                                loop = False
 
                 elif key == '$': # Go to end of current row
-                if not wizard.has_active_portal():
-                    old_pos = wizard.position
-                    _, current_y = wizard.position
-                    new_pos = ((arena._size -1) * 2, current_y)
-                    number_buffer = "" # Clear buffer
-                    
-                    # Only teleport if not moving to same position
-                    if old_pos != new_pos:
-                        wizard.create_portal(old_pos, new_pos)
-                        wizard.position = new_pos
+                    if not wizard.has_active_portal():
+                        old_pos = wizard.position
+                        _, current_y = wizard.position
+                        new_pos = ((arena._size -1) * 2, current_y)
+                        number_buffer = "" # Clear buffer
                         
-                        # Check for tail collision
-                        if wizard.collision_with_tail():
-                            loop = False
+                        # Only teleport if not moving to same position
+                        if old_pos != new_pos:
+                            wizard.create_portal(old_pos, new_pos)
+                            wizard.position = new_pos
+                            
+                            # Check for tail collision
+                            if wizard.collision_with_tail():
+                                loop = False
             
                 # collision detection
                 if wizard.collision(crystal):
-                # call the crystal re-render method
-                wizard.collect_crystals()
-                crystal.spawn(wizard)
+                    # call the crystal re-render method
+                    wizard.collect_crystals()
+                    crystal.spawn(wizard)
 
                 # Handle number input (0-9)
                 elif key.isdigit() and (key != '0' or number_buffer): # Allow 0 if buffer has content
-                number_buffer += key
+                    number_buffer += key
 
                 # Handle G command for row teleportation
                 elif key == 'G' and number_buffer:
-                if not wizard.has_active_portal():
-                    target_row = int(number_buffer) - 1 # Adjusted for zero index
-                    old_pos = wizard.position
-                    current_x, _ = wizard.position
-                    new_pos = (current_x, target_row)
+                    if not wizard.has_active_portal():
+                        target_row = int(number_buffer) - 1 # Adjusted for zero index
+                        old_pos = wizard.position
+                        current_x, _ = wizard.position
+                        new_pos = (current_x, target_row)
 
-                    # Check if target row is valid and not same position
-                    if 0 <= target_row <= arena._size -1 and old_pos != new_pos:
-                        wizard.create_portal(old_pos, new_pos)
-                        wizard.position = new_pos
-                        
-                        # Check for tail collision
-                        if wizard.collision_with_tail():
-                            loop = False
+                        # Check if target row is valid and not same position
+                        if 0 <= target_row <= arena._size -1 and old_pos != new_pos:
+                            wizard.create_portal(old_pos, new_pos)
+                            wizard.position = new_pos
+                            
+                            # Check for tail collision
+                            if wizard.collision_with_tail():
+                                loop = False
 
-                number_buffer = "" # Clearing buffer after use of G command
+                    number_buffer = "" # Clearing buffer after use of G command
 
                 # Clear buffer on other keys
                 elif key and not key.isdigit():
