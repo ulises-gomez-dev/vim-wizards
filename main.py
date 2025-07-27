@@ -5,8 +5,15 @@ Main entry point for the wizard game
 
 from blessed import Terminal
 from game import Arena, Wizard
+from menu import Menu
 
 def main():
+    # Show menu
+    menu = Menu()
+    if not menu.display():
+        print("Thanks for playing!")
+        return
+
     # Initialize terminal
     term = Terminal()
     
