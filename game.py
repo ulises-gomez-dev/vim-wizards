@@ -7,7 +7,7 @@ class Arena:
             ["." if (c % 2 == 0) else " " for c in range(self._column_size)]
             for r in range(self._row_size)
         ]
-        self._top_down_border = f"  +{'-' * (self._column_size + 2)}+\n"
+        self._top_down_border = f"   +{'-' * (self._column_size + 2)}+\n"
 
     def render_wizard_to_arena(self, position, symbol):
         x, y = position
@@ -34,7 +34,11 @@ class Arena:
         # self.wizzard_position()
 
         for r in range(self._row_size):
+            if r < 10:
+                render += " "
+
             render += f"{r} | "
+
             for c in range(self._column_size):
                 render += self._arena[r][c]
 
@@ -45,8 +49,8 @@ class Arena:
 
 
 class Wizard:
-    def __init__(self, x, y, arena, enemy=False):
-        self._symbol = "W" if not enemy else "E"
+    def __init__(self, x, y, arena):
+        self._symbol = "W"
         self._arena = arena
         self._x = x
         self._y = y
@@ -74,7 +78,7 @@ class Wizard:
 def test():
     x = 0
     y = 4
-    arena = Arena()
+    arena = Arena(size=15)
     wizard = Wizard(x, y, arena)
     print(arena)
     wizard.position = (2, 4)
