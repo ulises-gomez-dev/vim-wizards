@@ -8,13 +8,16 @@ from blessed import Terminal
 class Menu:
     def __init__(self):
         self.term = Terminal()
-        self.logo = """
-        ╦  ╦╦╔╦╗╦ ╦╦╔═╗╔═╗╦═╗╔╦╗╔═╗
-        ╚╗╔╝║║║║║║║║╔═╝╠═╣╠╦╝ ║║╚═╗
-         ╚╝ ╩╩ ╩╚╩╝╩╚═╝╩ ╩╩╚══╩╝╚═╝
-        """
+        self.logo = self.load_logo("assets/ascii/logo.txt")
         self.options = ['Start Game', 'Quit']
         self.selected = 0
+
+    def load_logo(self,path):
+        try:
+            with open(path, "r", encoding="utf-8") as file:
+                return file.read()
+        except FileNotFoundError:
+            return "[Logo file not found]"
 
     def display(self):
         # Display the menu and handle user input
