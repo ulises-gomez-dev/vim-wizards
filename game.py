@@ -55,6 +55,7 @@ class Wizard:
         self._arena = arena
         self._x = x
         self._y = y
+        self._crystals = 0
 
         self.render_wizard_to_arena()
 
@@ -66,10 +67,15 @@ class Wizard:
     @position.setter
     def position(self, position):
         self._arena.clean_up_wizard(self.position)
-
         self._x, self._y = position
-
         self.render_wizard_to_arena()
+
+    @property
+    def crystals(self):
+        return self._crystals
+
+    def collect_crystals(self):
+        self._crystals += 1
 
     def render_wizard_to_arena(self):
         self._arena.render_object_to_arena(self.position, self._symbol)
@@ -97,18 +103,17 @@ class Crystal:
         self._x, self._y = position
         self.render_crystal_to_arena()
 
-    def spawn(self, arena):
-        # determines where the crystal should be placed on the arena
-        x = randrange(0, arena._column_size)
-        y = randrange(0, arena._row_size)
-        self.position = (x, y)
+    def spawn(self, wizard: Wizard):
+        wx, wy = wizard.position
 
-    def collect(self, wizard: Wizard):
-        # pass a Wizard object and grab position to determine if the stone was collected
-
-        if wizard.position == self.position:  # did the Wizard collect the crystal
-            # perform some addition action on Wizard
-            self.spawn()
+        spawned = False
+        while not spawned:
+            # determines where the crystal should be placed on the arena
+            x = randrange(0, self._arena._column_size, 2)
+            y = randrange(0, self._arena._row_size)
+            if abs(x - wx) > 2 and abs(y - wy) > 2:
+                self.position = (x, y)
+                spawned = True 
 
     def render_crystal_to_arena(self):
         self._arena.render_object_to_arena(self.position, self._symbol)

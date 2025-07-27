@@ -33,6 +33,9 @@ def main():
             # Clear the screen
             print('\033[2J\033[3J\033[H')
 
+            # Show Crystals collected
+            print(f"Crystals collected: {wizard.crystals}\n")
+
             # Show the arena
             print(arena)
 
@@ -83,8 +86,8 @@ def main():
             # collision detection
             if wizard.collision(crystal):
                 # call the crystal re-render method
-                # crystal.spawn() 
-                pass
+                wizard.collect_crystals()
+                crystal.spawn(wizard) 
 
             # Handle number input (0-9)
             elif key.isdigit() and key != '0': # We have to skip 0 since 0 already snaps us back to first column...
