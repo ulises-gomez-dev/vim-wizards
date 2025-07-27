@@ -92,7 +92,7 @@ def main():
 
             # Handle G command for row teleportation
             elif key == 'G' and number_buffer:
-                target_row = int(number_buffer)
+                target_row = int(number_buffer) - 1 # Adjusted for zero index
                 curent_x, _ = wizard.position
 
                 # Check if target row is valid
