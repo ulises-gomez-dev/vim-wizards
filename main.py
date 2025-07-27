@@ -33,8 +33,8 @@ def main():
             # Clear the screen
             print('\033[2J\033[3J\033[H')
 
-            # Show Crystals collected
-            print(f"Crystals collected: {wizard.crystals}\n")
+            # Show Crystals collected as score
+            print(f"Score: {wizard.crystals}")
 
             # Show the arena
             print(arena)
@@ -83,27 +83,41 @@ def main():
                             loop = False
             
             elif key == '0' and not number_buffer: # Go to start of current row only if buffer is empty
-                _, current_y = wizard.position
-                wizard.position = (0, current_y)
-                
-                # Check for tail collision
-                if wizard.collision_with_tail():
-                    loop = False
+                if not wizard.has_active_portal():
+                    old_pos = wizard.position
+                    _, current_y = wizard.position
+                    new_pos = (0, current_y)
+                    
+                    # Only teleport if not moving to same position
+                    if old_pos != new_pos:
+                        wizard.create_portal(old_pos, new_pos)
+                        wizard.position = new_pos
+                        
+                        # Check for tail collision
+                        if wizard.collision_with_tail():
+                            loop = False
 
             elif key == '$': # Go to end of current row
-                _, current_y = wizard.position
-                wizard.position = ((arena._size -1) * 2, current_y)
-                number_buffer = "" # Clear buffer
-                
-                # Check for tail collision
-                if wizard.collision_with_tail():
-                    loop = False
+                if not wizard.has_active_portal():
+                    old_pos = wizard.position
+                    _, current_y = wizard.position
+                    new_pos = ((arena._size -1) * 2, current_y)
+                    number_buffer = "" # Clear buffer
+                    
+                    # Only teleport if not moving to same position
+                    if old_pos != new_pos:
+                        wizard.create_portal(old_pos, new_pos)
+                        wizard.position = new_pos
+                        
+                        # Check for tail collision
+                        if wizard.collision_with_tail():
+                            loop = False
             
             # collision detection
             if wizard.collision(crystal):
                 # call the crystal re-render method
                 wizard.collect_crystals()
-                crystal.spawn(wizard) 
+                crystal.spawn(wizard)
 
             # Handle number input (0-9)
             elif key.isdigit() and (key != '0' or number_buffer): # Allow 0 if buffer has content
@@ -111,22 +125,29 @@ def main():
 
             # Handle G command for row teleportation
             elif key == 'G' and number_buffer:
-                target_row = int(number_buffer) - 1 # Adjusted for zero index
-                current_x, _ = wizard.position
+                if not wizard.has_active_portal():
+                    target_row = int(number_buffer) - 1 # Adjusted for zero index
+                    old_pos = wizard.position
+                    current_x, _ = wizard.position
+                    new_pos = (current_x, target_row)
 
-                # Check if target row is valid
-                if 0 <= target_row <= arena._size -1:
-                    wizard.position = (current_x, target_row)
-                    
-                    # Check for tail collision
-                    if wizard.collision_with_tail():
-                        loop = False
+                    # Check if target row is valid and not same position
+                    if 0 <= target_row <= arena._size -1 and old_pos != new_pos:
+                        wizard.create_portal(old_pos, new_pos)
+                        wizard.position = new_pos
+                        
+                        # Check for tail collision
+                        if wizard.collision_with_tail():
+                            loop = False
 
                 number_buffer = "" # Clearing buffer after use of G command
 
             # Clear buffer on other keys
             elif key and not key.isdigit():
                 number_buffer = ""
+            
+            # Check if portal should close (after all movements)
+            wizard.check_portal_clear()
 
     # Clear screen on exit
     print(term.clear)

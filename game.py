@@ -58,6 +58,9 @@ class Wizard:
         self._crystals = 0
         self._tail = []
         self._tail_symbol = "o"
+        self._portal_entry = None
+        self._portal_exit = None
+        self._portal_symbol = "@"
 
         self.render_wizard_to_arena()
 
@@ -86,6 +89,12 @@ class Wizard:
         
         self._x, self._y = position
         self.render_wizard_to_arena()
+        
+        # Re-render portals if they exist (in case they were overwritten)
+        if self._portal_entry:
+            self._arena.render_object_to_arena(self._portal_entry, self._portal_symbol)
+        if self._portal_exit:
+            self._arena.render_object_to_arena(self._portal_exit, self._portal_symbol)
 
     @property
     def crystals(self):
@@ -105,6 +114,27 @@ class Wizard:
     
     def collision_with_tail(self):
         return self.position in self._tail
+    
+    def has_active_portal(self):
+        return self._portal_entry is not None or self._portal_exit is not None
+    
+    def create_portal(self, from_pos, to_pos):
+        self._portal_entry = from_pos
+        self._portal_exit = to_pos
+        # Render portals
+        self._arena.render_object_to_arena(from_pos, self._portal_symbol)
+        self._arena.render_object_to_arena(to_pos, self._portal_symbol)
+    
+    def check_portal_clear(self):
+        # Check if all tail segments have passed through the portal
+        if self._portal_entry and self._portal_exit:
+            # Portal is clear when no tail segments are at the entry position
+            if self._portal_entry not in self._tail:
+                # Clean up portals
+                self._arena.clean_up_wizard(self._portal_entry)
+                self._arena.clean_up_wizard(self._portal_exit)
+                self._portal_entry = None
+                self._portal_exit = None
 
 
 class Crystal:
