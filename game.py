@@ -56,6 +56,8 @@ class Wizard:
         self._x = x
         self._y = y
         self._crystals = 0
+        self._tail = []
+        self._tail_symbol = "o"
 
         self.render_wizard_to_arena()
 
@@ -67,6 +69,21 @@ class Wizard:
     @position.setter
     def position(self, position):
         self._arena.clean_up_wizard(self.position)
+        
+        # Update tail positions
+        if self._tail:
+            # Clean up the last tail segment
+            if len(self._tail) >= self._crystals:
+                last_segment = self._tail.pop()
+                self._arena.clean_up_wizard(last_segment)
+            
+            # Add current position to front of tail
+            self._tail.insert(0, self.position)
+            
+            # Render the tail
+            for segment in self._tail:
+                self._arena.render_object_to_arena(segment, self._tail_symbol)
+        
         self._x, self._y = position
         self.render_wizard_to_arena()
 
@@ -76,12 +93,18 @@ class Wizard:
 
     def collect_crystals(self):
         self._crystals += 1
+        # When collecting a crystal, add current position to tail
+        if self.position not in self._tail:
+            self._tail.insert(0, self.position)
 
     def render_wizard_to_arena(self):
         self._arena.render_object_to_arena(self.position, self._symbol)
 
     def collision(self, game_object):
         return self.position == game_object.position
+    
+    def collision_with_tail(self):
+        return self.position in self._tail
 
 
 class Crystal:
@@ -111,9 +134,13 @@ class Crystal:
             # determines where the crystal should be placed on the arena
             x = randrange(0, self._arena._column_size, 2)
             y = randrange(0, self._arena._row_size)
+            
+            # Check if position is far enough from wizard AND not on any tail segment
             if abs(x - wx) > 2 and abs(y - wy) > 2:
-                self.position = (x, y)
-                spawned = True 
+                # Also check that it's not on any tail segment
+                if (x, y) not in wizard._tail:
+                    self.position = (x, y)
+                    spawned = True 
 
     def render_crystal_to_arena(self):
         self._arena.render_object_to_arena(self.position, self._symbol)

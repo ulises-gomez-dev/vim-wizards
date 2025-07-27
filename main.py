@@ -40,7 +40,7 @@ def main():
             print(arena)
 
             # Display instructions
-            print(f"Press 'h/j/k/l' to move left/up/down/right")
+            print(f"Press 'h/j/k/l' to move left/down/up/right")
             print(f"Press '0/$' to teleport leftmost/rightmost")
             print(f"Press '#G' to teleport to row # (e.g., 5G for row 5)")
             print(f"Press 'Q' to quit")
@@ -72,16 +72,32 @@ def main():
             # Check boundaries
                 if ( 0 <= new_x <= (arena._size -1) * 2 and
                     0 <= new_y <= arena._size -1):
-                    wizard.position = (new_x, new_y)
+                    # Check if trying to move into the immediate tail segment
+                    if wizard._tail and (new_x, new_y) == wizard._tail[0]:
+                        pass  # Don't allow this move
+                    else:
+                        wizard.position = (new_x, new_y)
+                        
+                        # Check for tail collision
+                        if wizard.collision_with_tail():
+                            loop = False
             
-            elif key == '0': # Go to start of current row
+            elif key == '0' and not number_buffer: # Go to start of current row only if buffer is empty
                 _, current_y = wizard.position
                 wizard.position = (0, current_y)
+                
+                # Check for tail collision
+                if wizard.collision_with_tail():
+                    loop = False
 
             elif key == '$': # Go to end of current row
                 _, current_y = wizard.position
                 wizard.position = ((arena._size -1) * 2, current_y)
                 number_buffer = "" # Clear buffer
+                
+                # Check for tail collision
+                if wizard.collision_with_tail():
+                    loop = False
             
             # collision detection
             if wizard.collision(crystal):
@@ -90,7 +106,7 @@ def main():
                 crystal.spawn(wizard) 
 
             # Handle number input (0-9)
-            elif key.isdigit() and key != '0': # We have to skip 0 since 0 already snaps us back to first column...
+            elif key.isdigit() and (key != '0' or number_buffer): # Allow 0 if buffer has content
                 number_buffer += key
 
             # Handle G command for row teleportation
@@ -101,6 +117,10 @@ def main():
                 # Check if target row is valid
                 if 0 <= target_row <= arena._size -1:
                     wizard.position = (current_x, target_row)
+                    
+                    # Check for tail collision
+                    if wizard.collision_with_tail():
+                        loop = False
 
                 number_buffer = "" # Clearing buffer after use of G command
 
@@ -110,7 +130,22 @@ def main():
 
     # Clear screen on exit
     print(term.clear)
-    print("The wizard has left the building")
+    
+    # Game over screen
+    if wizard.collision_with_tail():
+        print("\n" * 5)
+        print("=" * 40)
+        print("         GAME OVER!")
+        print("=" * 40)
+        print(f"\nThe wizard collided with their tail!")
+        print(f"Final Score: {wizard.crystals}")
+        print("\nPress any key to exit...")
+        
+        # Wait for a key press before exiting
+        with term.cbreak():
+            term.inkey()
+    else:
+        print("The wizard has left the building")
 
 if __name__ == "__main__":
     main()
