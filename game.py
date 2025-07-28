@@ -1,3 +1,4 @@
+import random
 from random import randrange
 
 
@@ -11,6 +12,16 @@ class Arena:
             for r in range(self._row_size)
         ]
         self._top_down_border = f"   +{'-' * (self._column_size + 2)}+\n"
+        self._rendered_objects_percentage = 2
+
+    @property
+    def arena(self):
+        """The arena property."""
+        return self._arena
+
+    @arena.setter
+    def arena(self, value):
+        self._arena = value
 
     def render_object_to_arena(self, position, symbol):
         x, y = position
@@ -72,59 +83,70 @@ class Wizard:
     @position.setter
     def position(self, position):
         self._arena.clean_up_wizard(self.position)
-        
+
         # Update tail positions
         if self._tail:
             # Clean up the last tail segment
             if len(self._tail) >= self._crystals:
                 last_segment = self._tail.pop()
                 self._arena.clean_up_wizard(last_segment)
-            
+
             # Add current position to front of tail
             self._tail.insert(0, self.position)
-            
+
             # Render the tail
             for segment in self._tail:
                 self._arena.render_object_to_arena(segment, self._tail_symbol)
-        
+
         self._x, self._y = position
         self.render_wizard_to_arena()
-        
+
         # Re-render portals if they exist (in case they were overwritten)
         if self._portal_entry:
             self._arena.render_object_to_arena(self._portal_entry, self._portal_symbol)
         if self._portal_exit:
             self._arena.render_object_to_arena(self._portal_exit, self._portal_symbol)
 
+        # TODO: place in a Arena object helper function
+        objects_rendered = len(self._tail) + 2
+        size = self._arena._size
+        self._arena._rendered_objects_percentage = int((objects_rendered / (size * size)) * 100)
+
     @property
     def crystals(self):
         return self._crystals
 
-    def collect_crystals(self):
+    def collect_crystals(self, crystal):
         self._crystals += 1
         # When collecting a crystal, add current position to tail
         if self.position not in self._tail:
             self._tail.insert(0, self.position)
+
+        crystal.spawn(self)
 
     def render_wizard_to_arena(self):
         self._arena.render_object_to_arena(self.position, self._symbol)
 
     def collision(self, game_object):
         return self.position == game_object.position
-    
+
     def collision_with_tail(self):
         return self.position in self._tail
-    
+
     def has_active_portal(self):
         return self._portal_entry is not None or self._portal_exit is not None
-    
-    def create_portal(self, from_pos, to_pos):
+
+    def create_portal(self, from_pos, to_pos, crystal):
         self._portal_entry = from_pos
         self._portal_exit = to_pos
         # Render portals
         self._arena.render_object_to_arena(from_pos, self._portal_symbol)
         self._arena.render_object_to_arena(to_pos, self._portal_symbol)
-    
+        
+        if to_pos == crystal.position:
+           self.collect_crystals(crystal)
+
+
     def check_portal_clear(self):
         # Check if all tail segments have passed through the portal
         if self._portal_entry and self._portal_exit:
@@ -156,7 +178,7 @@ class Crystal:
         self._x, self._y = position
         self.render_crystal_to_arena()
 
-    def spawn(self, wizard: Wizard):
+    def spawn_depreciated(self, wizard: Wizard):
         wx, wy = wizard.position
 
         spawned = False
@@ -164,13 +186,23 @@ class Crystal:
             # determines where the crystal should be placed on the arena
             x = randrange(0, self._arena._column_size, 2)
             y = randrange(0, self._arena._row_size)
-            
+
             # Check if position is far enough from wizard AND not on any tail segment
             if abs(x - wx) > 2 and abs(y - wy) > 2:
                 # Also check that it's not on any tail segment
                 if (x, y) not in wizard._tail:
                     self.position = (x, y)
-                    spawned = True 
+                    spawned = True
+
+    def spawn(self, wizard: Wizard):
+        spawn_points = []
+
+        for y in range(self._arena._row_size):
+            for x in range(0, self._arena._column_size, 2):
+                if self._arena.arena[y][x] == ".":
+                    spawn_points.append((x, y))
+
+        self.position = random.choice(spawn_points)
 
     def render_crystal_to_arena(self):
         self._arena.render_object_to_arena(self.position, self._symbol)

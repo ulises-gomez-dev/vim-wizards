@@ -4,7 +4,8 @@ Main entry point for the wizard game
 """
 
 from blessed import Terminal
-from game import Arena, Wizard, Crystal
+
+from game import Arena, Crystal, Wizard
 from menu import Menu
 
 def main():
@@ -30,14 +31,17 @@ def main():
     command_buffer = ""
     command_mode = False
 
-    with term.cbreak(), term.hidden_cursor():
+    with term.fullscreen(), term.cbreak(), term.hidden_cursor():
+
         loop = True
         while loop:
+
             # Clear the screen
             print('\033[2J\033[3J\033[H')
 
             # Show Crystals collected as score
             print(f"Score: {wizard.crystals}")
+            print(f"Available: {arena._rendered_objects_percentage}\n")
 
             # Show the arena
             print(arena)
@@ -117,7 +121,7 @@ def main():
                         
                         # Only teleport if not moving to same position
                         if old_pos != new_pos:
-                            wizard.create_portal(old_pos, new_pos)
+                            wizard.create_portal(old_pos, new_pos, crystal)
                             wizard.position = new_pos
                             
                             # Check for tail collision
@@ -133,7 +137,7 @@ def main():
                         
                         # Only teleport if not moving to same position
                         if old_pos != new_pos:
-                            wizard.create_portal(old_pos, new_pos)
+                            wizard.create_portal(old_pos, new_pos, crystal)
                             wizard.position = new_pos
                             
                             # Check for tail collision
@@ -143,8 +147,7 @@ def main():
                 # collision detection
                 if wizard.collision(crystal):
                     # call the crystal re-render method
-                    wizard.collect_crystals()
-                    crystal.spawn(wizard)
+                    wizard.collect_crystals(crystal)
 
                 # Handle number input (0-9)
                 elif key.isdigit() and (key != '0' or number_buffer): # Allow 0 if buffer has content
@@ -160,7 +163,7 @@ def main():
 
                         # Check if target row is valid and not same position
                         if 0 <= target_row <= arena._size -1 and old_pos != new_pos:
-                            wizard.create_portal(old_pos, new_pos)
+                            wizard.create_portal(old_pos, new_pos, crystal)
                             wizard.position = new_pos
                             
                             # Check for tail collision
