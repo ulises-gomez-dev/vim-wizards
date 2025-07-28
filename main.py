@@ -53,7 +53,7 @@ def play_game():
 
             # Show Crystals collected as score
             print(f"Score: {wizard.crystals}")
-            print(f"Available: {arena._rendered_objects_percentage}%\n")
+            # print(f"Available: {arena._rendered_objects_percentage}%\n") # For debugging purposes
 
             # Show the arena
             print(arena)
