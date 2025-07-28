@@ -11,7 +11,7 @@ A terminal-based arcade game where you control a wizard using Vim movement comma
 VimWizards is a hackathon project made thanks to [boot.dev](https://blog.boot.dev/news/hackathon-2025/).
 
 ## Play Now
-![play over ssh](assets/ssh.gif)
+[![play over ssh](assets/ssh.gif)](https://youtu.be/-OxVP4ZrVDE)
 
 ### Option 1: Play Online (Recommended)
 ```bash
