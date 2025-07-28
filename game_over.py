@@ -39,12 +39,12 @@ class GameOverScreen:
         print(ascii_art)
         
         # Show score
-        print(f"Final Score: {score}")
+        print(f"\tFinal Score: {score}")
         print()
         
         # Show additional message if provided
         if message:
-            print(message)
+            print(f"\t{message}")
             print()
     
     def get_player_initials(self):
@@ -56,11 +56,11 @@ class GameOverScreen:
         
         while True:
             self.display_game_over(0, "Enter your initials (3 characters):")
-            print(f"Initials: {initials}_")
+            print(f"\tInitials: {initials}_")
             print()
-            print("Enter 3 letters for your initials")
+            print("\tEnter 3 letters for your initials")
             if len(initials) == 3:
-                print("Press Enter to submit or Backspace to edit")
+                print("\tPress Enter to submit or Backspace to edit")
             
             with self.term.cbreak():
                 key = self.term.inkey()
@@ -85,9 +85,9 @@ class GameOverScreen:
                     if len(initials) == 3:
                         # Show the completed initials
                         self.display_game_over(0, "Enter your initials (3 characters):")
-                        print(f"Initials: {initials}")
+                        print(f"\tInitials: {initials}")
                         print()
-                        print("Press Enter to submit or Backspace to edit")
+                        print("\tPress Enter to submit or Backspace to edit")
                         
                         # Wait for Enter or continue editing
                         with self.term.cbreak():
@@ -106,7 +106,7 @@ class GameOverScreen:
     
     def wait_for_continue(self, message="Press any key to continue..."):
         """Wait for user to press any key."""
-        print(message)
+        print(f"\t{message}")
         with self.term.cbreak():
             self.term.inkey()
     

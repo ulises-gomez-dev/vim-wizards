@@ -28,27 +28,27 @@ class Menu:
                 print('\033[2J\033[3J\033[H')
                 
                 # Display header
-                print("HIGH SCORES")
-                print("=" * 50)
+                print("\tHIGH SCORES")
+                print("\t" + "=" * 50)
                 print()
                 
                 # Get top 10 scores
                 scores = get_top_high_scores(10)
                 
                 if not scores:
-                    print("No high scores yet!")
-                    print("Be the first to set a record!")
+                    print("\tNo high scores yet!")
+                    print("\tBe the first to set a record!")
                 else:
-                    print(f"{'Rank':<6} {'Initials':<10} {'Score':<10} {'Date'}")
-                    print("-" * 50)
+                    print(f"\t{'Rank':<6} {'Initials':<10} {'Score':<10} {'Date'}")
+                    print("\t" + "-" * 50)
                     
                     for i, (initials, score, date) in enumerate(scores, 1):
                         # Format date to show just the date part (YYYY-MM-DD)
                         formatted_date = date.split()[0] if ' ' in date else date
-                        print(f"{i:<6} {initials:<10} {score:<10} {formatted_date}")
+                        print(f"\t{i:<6} {initials:<10} {score:<10} {formatted_date}")
                 
                 print()
-                print("Press any key to return to main menu...")
+                print("\tPress any key to return to main menu...")
                 
                 # Wait for any key press
                 self.term.inkey()
@@ -68,12 +68,12 @@ class Menu:
                 # Display menu options
                 for i, option in enumerate(self.options):
                     if i == self.selected:
-                        print(f"> {option}")
+                        print(f"\t\t> {option}")
                     else:
-                        print(f"  {option}")
+                        print(f"\t\t  {option}")
 
                 print()
-                print("Use j/k to navigate, Enter to select")
+                print("\tUse j/k to navigate, Enter to select")
 
                 # Get user input
                 key = self.term.inkey()
