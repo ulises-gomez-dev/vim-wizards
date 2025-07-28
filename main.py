@@ -7,14 +7,25 @@ from blessed import Terminal
 
 from game import Arena, Crystal, Wizard
 from menu import Menu
+from game_over import GameOverScreen
+from database import init_database
 
 def main():
-    # Show menu
-    menu = Menu()
-    if not menu.display():
-        print("Thanks for playing!")
-        return
+    # Initialize database
+    init_database()
+    
+    # Main application loop
+    while True:
+        # Show menu
+        menu = Menu()
+        if not menu.display():
+            print("Thanks for playing!")
+            return
 
+        # Initialize terminal and start game
+        play_game()
+
+def play_game():
     # Initialize terminal
     term = Terminal()
     
@@ -34,6 +45,7 @@ def main():
     with term.fullscreen(), term.cbreak(), term.hidden_cursor():
 
         loop = True
+        game_lost = False
         while loop:
 
             # Clear the screen
@@ -111,6 +123,7 @@ def main():
                             
                             # Check for tail collision
                             if wizard.collision_with_tail():
+                                game_lost = True
                                 loop = False
             
                 elif key == '0' and not number_buffer: # Go to start of current row only if buffer is empty
@@ -126,6 +139,7 @@ def main():
                             
                             # Check for tail collision
                             if wizard.collision_with_tail():
+                                game_lost = True
                                 loop = False
 
                 elif key == '$': # Go to end of current row
@@ -142,6 +156,7 @@ def main():
                             
                             # Check for tail collision
                             if wizard.collision_with_tail():
+                                game_lost = True
                                 loop = False
             
                 # collision detection
@@ -168,6 +183,7 @@ def main():
                             
                             # Check for tail collision
                             if wizard.collision_with_tail():
+                                game_lost = True
                                 loop = False
 
                     number_buffer = "" # Clearing buffer after use of G command
@@ -182,21 +198,17 @@ def main():
     # Clear screen on exit
     print(term.clear)
     
-    # Game over screen
-    if wizard.collision_with_tail():
-        print("\n" * 5)
-        print("=" * 40)
-        print("         GAME OVER!")
-        print("=" * 40)
-        print(f"\nThe wizard collided with their tail!")
-        print(f"Final Score: {wizard.crystals}")
-        print("\nPress any key to exit...")
-        
-        # Wait for a key press before exiting
-        with term.cbreak():
-            term.inkey()
+    # Handle different exit scenarios
+    if game_lost:
+        # Show game over screen with initials input
+        game_over_screen = GameOverScreen()
+        game_over_screen.show(wizard.crystals)
+        # After game over, return to menu
     else:
         print("The wizard has left the building")
+        # Brief pause before returning to menu
+        import time
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
