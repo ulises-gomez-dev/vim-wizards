@@ -151,7 +151,8 @@ class Wizard:
         # Check if all tail segments have passed through the portal
         if self._portal_entry and self._portal_exit:
             # Portal is clear when no tail segments are at the entry position
-            if self._portal_entry not in self._tail:
+            # and wizard is not at the exit position
+            if self._portal_entry not in self._tail and self.position != self._portal_exit:
                 # Clean up portals
                 self._arena.clean_up_wizard(self._portal_entry)
                 self._arena.clean_up_wizard(self._portal_exit)
